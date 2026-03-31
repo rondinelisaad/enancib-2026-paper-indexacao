@@ -1,6 +1,7 @@
 # Reprodutibilidade do pipeline analítico
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19355940.svg)](https://doi.org/10.5281/zenodo.19355940)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Este repositório contém o pipeline para análise de estabilidade de indexação, densidade de DOI e posição estrutural de periódicos brasileiros de acesso aberto no período de 2000–2024.
 
