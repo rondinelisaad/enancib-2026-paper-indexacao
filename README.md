@@ -1,5 +1,7 @@
 # Reprodutibilidade do pipeline analítico
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19355940.svg)](https://doi.org/10.5281/zenodo.19355940)
+
 Este repositório contém o pipeline para análise de estabilidade de indexação, densidade de DOI e posição estrutural de periódicos brasileiros de acesso aberto no período de 2000–2024.
 
 ## Objetivo
@@ -42,3 +44,10 @@ enancib-2026-paper-indexacao/
 ├── requirements.txt
 ├── run_pipeline.sh
 └── README.md
+
+## Reprodutibilidade
+
+O pipeline completo pode ser executado via:
+
+```bash
+bash run_pipeline.sh
