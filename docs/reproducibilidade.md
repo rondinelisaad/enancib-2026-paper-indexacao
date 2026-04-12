@@ -25,12 +25,12 @@ O pipeline reproduz:
 
 Os dados utilizados não correspondem ao universo completo da produção científica, mas a um recorte específico:
 
-- OpenAlex: artigos com pelo menos um autor com afiliação brasileira
-- Latindex: periódicos brasileiros
+- **OpenAlex:** artigos com pelo menos um autor com afiliação brasileira
+- **Latindex:** periódicos brasileiros
 
 Os datasets completos utilizados estão disponíveis em:
 
-👉 https://doi.org/10.5281/zenodo.19355939
+> 👉 https://doi.org/10.5281/zenodo.19355939
 
 Arquivos principais:
 
@@ -54,34 +54,47 @@ Todos os passos são executados via:
 
 ```bash
 bash run_pipeline.sh
+```
+
+---
 
 ## 4. Ambiente
 
 Requisitos:
+
 - Python 3.9+
-- Dependências:
+
+**Instalação das dependências:**
 
 ```bash
 pip install -r requirements.txt
+```
 
 Principais bibliotecas:
-- pandas
-- statsmodels
+
+- `pandas`
+- `statsmodels`
+
+---
 
 ## 5. Execução
 
-Execução padrão
+**Execução padrão:**
 
 ```bash
 bash run_pipeline.sh
+```
 
-Execução com caminhos customizados
+**Execução com caminhos customizados:**
 
 ```bash
 OPENALEX_INPUT="caminho/openalex.csv" \
 LATINDEX_INPUT="caminho/latindex.csv" \
 OUTPUT_DIR="caminho/outputs" \
 bash run_pipeline.sh
+```
+
+---
 
 ## 6. Outputs esperados
 
@@ -100,39 +113,53 @@ outputs/
 ├── 06_modelos/
 │   └── modelos_continuidade.txt
 └── logs/
+```
 
 Resultados principais:
+
 - ~2.800 periódicos analisados
 - ~1.000.000 artigos agregados
 - distribuição de Bradford em três zonas
 - associação entre posição estrutural e continuidade observada
 
+---
+
 ## 7. Validação dos resultados
 
 Após execução, verificar:
+
 - número de periódicos: ~2861
 - registros periódico-ano: ~30133
 - ausência de perdas no merge final
 - geração de todos os arquivos CSV e TXT
 
+---
+
 ## 8. Interpretação
 
-Os resultados devem ser interpretados como:
+**Os resultados devem ser interpretados como:**
+
 - padrões de continuidade da presença observada no OpenAlex
 - associações entre posição estrutural e continuidade
 - efeito complementar da proporção de DOI
 
-Não devem ser interpretados como:
+**Não devem ser interpretados como:**
+
 - prova de desaparecimento de periódicos
 - medida completa da produção editorial
 - relações causais
 
+---
+
 ## 9. Limitações da reprodução
+
 - OpenAlex é usado como proxy de presença no recorte analisado
 - o recorte inclui apenas produção com afiliação brasileira
 - a proporção de DOI é calculada sobre o conjunto observado
 - a deduplicação de artigos usa chave sintética (DOI + título + ano)
 - a classificação de Bradford depende da distribuição observada
+
+---
 
 ## 10. Reprodutibilidade e versionamento
 
@@ -141,7 +168,6 @@ Não devem ser interpretados como:
 - Pipeline determinístico (sem uso de aleatoriedade)
 
 Para garantir reprodutibilidade total:
+
 - utilizar os mesmos datasets
 - manter versões das dependências
-
-
