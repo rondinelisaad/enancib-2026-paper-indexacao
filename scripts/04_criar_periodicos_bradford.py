@@ -160,9 +160,8 @@ def classificar_bradford(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
-
 def gerar_resumo(bradford: pd.DataFrame) -> str:
-    total_periodicos = bradford["folio_u"].nunique()
+    n_periodicos = bradford["folio_u"].nunique()
     total_artigos = int(bradford["total_artigos"].sum())
 
     resumo_zonas = (
@@ -174,34 +173,49 @@ def gerar_resumo(bradford: pd.DataFrame) -> str:
         .reset_index()
     )
 
-    linhas = [
+    zonas = {
+        row["zona_bradford"]: {
+            "periodicos": int(row["periodicos"]),
+            "artigos": int(row["artigos"]),
+        }
+        for _, row in resumo_zonas.iterrows()
+    }
+
+    n_core = zonas.get("núcleo", {}).get("periodicos", 0)
+    art_core = zonas.get("núcleo", {}).get("artigos", 0)
+
+    n_z2 = zonas.get("zona 2", {}).get("periodicos", 0)
+    art_z2 = zonas.get("zona 2", {}).get("artigos", 0)
+
+    n_perif = zonas.get("periferia", {}).get("periodicos", 0)
+    art_perif = zonas.get("periferia", {}).get("artigos", 0)
+
+    resumo = [
         "=== RESUMO DA CLASSIFICAÇÃO DE BRADFORD ===",
         "",
-        f"Periódicos classificados: {total_periodicos}",
-        f"Total de artigos considerados: {total_artigos}",
+        f"Periódicos classificados: {n_periodicos}",
+        f"Total de artigos considerados no recorte: {total_artigos}",
         "",
         "Distribuição por zona:",
-    ]
-
-    for _, row in resumo_zonas.iterrows():
-        linhas.append(
-            f"- {row['zona_bradford']}: {int(row['periodicos'])} periódicos, {int(row['artigos'])} artigos"
-        )
-
-    linhas.extend([
+        f"- núcleo: {n_core} periódicos, {art_core} artigos",
+        f"- zona 2: {n_z2} periódicos, {art_z2} artigos",
+        f"- periferia: {n_perif} periódicos, {art_perif} artigos",
         "",
         "Critério utilizado:",
-        "- periódicos ordenados por total_artigos em ordem decrescente;",
-        "- acumulado de artigos dividido em três partes aproximadamente iguais;",
+        "- periódicos ordenados por total de artigos no recorte analisado;",
+        "- cálculo do acumulado de artigos;",
+        "- divisão do acumulado em três partes aproximadamente equivalentes;",
         "- classificação resultante: núcleo, zona 2 e periferia.",
         "",
-        "Cuidado analítico:",
-        "- esta implementação operacionaliza Bradford por terços do total acumulado de artigos;",
-        "- dependendo do desenho do artigo, você pode querer testar sensibilidade dessa divisão.",
-    ])
-
-    return "\n".join(linhas)
-
+        "Interpretação:",
+        "- A classificação expressa a posição estrutural relativa dos periódicos no conjunto analisado.",
+        "- As zonas refletem a concentração relativa de produção no recorte de artigos com afiliação brasileira presentes no OpenAlex.",
+        "- A divisão em zonas é uma operacionalização baseada na distribuição observada, não uma validação da Lei de Bradford em sentido estrito.",
+        "",
+        "Limitação:",
+        "- A posição estrutural é relativa ao recorte analisado e pode variar conforme a composição da base de entrada.",
+    ]
+    return "\n".join(resumo)
 
 def write_outputs(outdir: Path, bradford: pd.DataFrame, resumo: str) -> None:
     outdir.mkdir(parents=True, exist_ok=True)

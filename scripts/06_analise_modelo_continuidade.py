@@ -1,69 +1,113 @@
+#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+
 import pandas as pd
-import statsmodels.api as sm
 import statsmodels.formula.api as smf
 
-# ================================
-# 1. CARREGAR BASE
-# ================================
 
-df = pd.read_csv("base_analitica_periodicos.csv")
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Executa correlações e modelos de continuidade a partir da base analítica."
+    )
+    parser.add_argument(
+        "--input",
+        required=True,
+        help="Caminho para o arquivo base_analitica_periodicos.csv",
+    )
+    parser.add_argument(
+        "--output",
+        required=False,
+        help="Caminho opcional para salvar o relatório textual dos modelos",
+    )
+    args = parser.parse_args()
 
-# Garantir tipos
-df["proporcao_doi"] = pd.to_numeric(df["proporcao_doi"], errors="coerce")
-df["anos_com_indexacao"] = pd.to_numeric(df["anos_com_indexacao"], errors="coerce")
-df["lacuna_maxima"] = pd.to_numeric(df["lacuna_maxima"], errors="coerce")
+    input_path = Path(args.input)
+    if not input_path.is_file():
+        raise FileNotFoundError(f"Arquivo de entrada não encontrado: {input_path}")
 
-# remover NA críticos
-df = df.dropna(subset=["proporcao_doi", "anos_com_indexacao", "lacuna_maxima", "zona_bradford"])
+    df = pd.read_csv(input_path)
 
-# ================================
-# 2. CORRELAÇÃO (DOI × CONTINUIDADE)
-# ================================
+    required_cols = [
+        "proporcao_doi",
+        "anos_com_indexacao",
+        "lacuna_maxima",
+        "zona_bradford",
+        "categoria_continuidade",
+    ]
+    missing = [c for c in required_cols if c not in df.columns]
+    if missing:
+        raise ValueError(f"Colunas obrigatórias ausentes: {missing}")
 
-corr_anos = df["proporcao_doi"].corr(df["anos_com_indexacao"])
-corr_lacuna = df["proporcao_doi"].corr(df["lacuna_maxima"])
+    # Garantir tipos
+    df["proporcao_doi"] = pd.to_numeric(df["proporcao_doi"], errors="coerce")
+    df["anos_com_indexacao"] = pd.to_numeric(df["anos_com_indexacao"], errors="coerce")
+    df["lacuna_maxima"] = pd.to_numeric(df["lacuna_maxima"], errors="coerce")
 
-print("\n=== CORRELAÇÕES ===")
-print(f"DOI × anos_com_indexacao: {corr_anos:.4f}")
-print(f"DOI × lacuna_maxima: {corr_lacuna:.4f}")
+    # Remover NAs críticos
+    df = df.dropna(
+        subset=[
+            "proporcao_doi",
+            "anos_com_indexacao",
+            "lacuna_maxima",
+            "zona_bradford",
+            "categoria_continuidade",
+        ]
+    ).copy()
 
-# ================================
-# 3. MODELO 1 — CONTINUIDADE (REGRESSÃO)
-# ================================
+    if df.empty:
+        raise ValueError("Nenhuma observação válida restou após remoção de valores ausentes.")
 
-print("\n=== MODELO 1: anos_com_indexacao ~ DOI + Bradford ===")
+    # Correlações
+    corr_anos = df["proporcao_doi"].corr(df["anos_com_indexacao"])
+    corr_lacuna = df["proporcao_doi"].corr(df["lacuna_maxima"])
 
-modelo1 = smf.ols(
-    "anos_com_indexacao ~ proporcao_doi + C(zona_bradford)",
-    data=df
-).fit()
+    report_parts = []
 
-print(modelo1.summary())
+    report_parts.append("=== CORRELAÇÕES ===")
+    report_parts.append(f"DOI × anos_com_indexacao: {corr_anos:.4f}")
+    report_parts.append(f"DOI × lacuna_maxima: {corr_lacuna:.4f}")
+    report_parts.append("")
 
-# ================================
-# 4. MODELO 2 — LACUNA (INSTABILIDADE)
-# ================================
+    # Modelo 1
+    report_parts.append("=== MODELO 1: anos_com_indexacao ~ DOI + Bradford ===")
+    modelo1 = smf.ols(
+        "anos_com_indexacao ~ proporcao_doi + C(zona_bradford)",
+        data=df,
+    ).fit()
+    report_parts.append(str(modelo1.summary()))
+    report_parts.append("")
 
-print("\n=== MODELO 2: lacuna_maxima ~ DOI + Bradford ===")
+    # Modelo 2
+    report_parts.append("=== MODELO 2: lacuna_maxima ~ DOI + Bradford ===")
+    modelo2 = smf.ols(
+        "lacuna_maxima ~ proporcao_doi + C(zona_bradford)",
+        data=df,
+    ).fit()
+    report_parts.append(str(modelo2.summary()))
+    report_parts.append("")
 
-modelo2 = smf.ols(
-    "lacuna_maxima ~ proporcao_doi + C(zona_bradford)",
-    data=df
-).fit()
+    # Modelo 3
+    report_parts.append("=== MODELO 3: probabilidade de ser CONTINUANTE ===")
+    df["is_continuante"] = (df["categoria_continuidade"] == "continuante").astype(int)
 
-print(modelo2.summary())
+    modelo3 = smf.logit(
+        "is_continuante ~ proporcao_doi + C(zona_bradford)",
+        data=df,
+    ).fit()
+    report_parts.append(str(modelo3.summary()))
+    report_parts.append("")
 
-# ================================
-# 5. MODELO 3 — LOGÍSTICO (CONTINUANTE)
-# ================================
+    report = "\n".join(report_parts)
 
-print("\n=== MODELO 3: probabilidade de ser CONTINUANTE ===")
+    print(report)
 
-df["is_continuante"] = (df["categoria_continuidade"] == "continuante").astype(int)
+    if args.output:
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(report, encoding="utf-8")
+        print(f"\nRelatório salvo em: {output_path}")
 
-modelo3 = smf.logit(
-    "is_continuante ~ proporcao_doi + C(zona_bradford)",
-    data=df
-).fit()
 
-print(modelo3.summary())
+if __name__ == "__main__":
+    main()

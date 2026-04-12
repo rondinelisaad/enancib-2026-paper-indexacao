@@ -1,0 +1,55 @@
+# =========================
+# Outputs do pipeline
+# =========================
+outputs/*
+!outputs/.gitkeep
+
+# Logs
+outputs/logs/*
+!outputs/logs/.gitkeep
+
+# =========================
+# Dados brutos (NÃO versionar)
+# =========================
+data/*
+!data/.gitkeep
+
+# =========================
+# Amostras para reprodução
+# =========================
+!data_sample/*.csv
+
+# =========================
+# Arquivos grandes (proteção extra)
+# =========================
+*.csv
+*.tsv
+*.txt
+
+# EXCEÇÕES
+!data_sample/*.csv
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# =========================
+# Sistema operacional
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDEs
+# =========================
+.vscode/
+.idea/

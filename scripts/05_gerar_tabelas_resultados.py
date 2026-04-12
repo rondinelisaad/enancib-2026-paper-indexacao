@@ -335,7 +335,6 @@ def tabela_6_metricas_por_categoria(base: pd.DataFrame) -> pd.DataFrame:
         t[col] = t[col].round(4)
     return t.sort_values("periodicos", ascending=False)
 
-
 def build_summary_text(base: pd.DataFrame, t1: pd.DataFrame, t5: pd.DataFrame, t6: pd.DataFrame) -> str:
     total_periodicos = base["folio_u"].nunique()
     total_artigos = int(base["total_artigos"].sum())
@@ -346,17 +345,19 @@ def build_summary_text(base: pd.DataFrame, t1: pd.DataFrame, t5: pd.DataFrame, t
         "=== RESUMO ANALÍTICO PARA A SEÇÃO DE RESULTADOS ===",
         "",
         f"Periódicos na base analítica: {total_periodicos}",
-        f"Artigos agregados na base analítica: {total_artigos}",
-        f"Periódicos sem zona de Bradford: {sem_bradford}",
-        f"Periódicos sem proporção de DOI após merge: {sem_doi}",
+        f"Artigos agregados no recorte: {total_artigos}",
+        f"Periódicos sem classificação de Bradford: {sem_bradford}",
+        f"Periódicos sem proporção de DOI após integração: {sem_doi}",
         "",
-        "Tabela 1 resume a distribuição de periódicos e artigos por zona de Bradford.",
-        "Tabela 2 mostra a distribuição das categorias de continuidade por zona.",
+        "Descrição das tabelas:",
+        "Tabela 1 apresenta a distribuição de periódicos e artigos por zona de Bradford.",
+        "Tabela 2 mostra a distribuição das categorias de continuidade por zona estrutural.",
         "Tabela 3 resume a frequência geral das categorias de continuidade.",
-        "Tabela 4 cruza zona, categoria e densidade média de DOI.",
+        "Tabela 4 cruza zona estrutural, categoria de continuidade e proporção de DOI.",
         "Tabela 5 compara métricas médias por zona de Bradford.",
         "Tabela 6 compara métricas médias por categoria de continuidade.",
         "",
+        "Principais padrões observados:",
     ]
 
     t5_valid = t5.dropna(subset=["zona_bradford", "doi_medio"])
@@ -364,7 +365,7 @@ def build_summary_text(base: pd.DataFrame, t1: pd.DataFrame, t5: pd.DataFrame, t
         top_zone = t5_valid.sort_values("doi_medio", ascending=False).iloc[0]
         low_zone = t5_valid.sort_values("doi_medio", ascending=True).iloc[0]
         lines.append(
-            f"Entre as zonas com dados válidos, a maior média de DOI foi observada em '{top_zone['zona_bradford']}' "
+            f"- A maior média de proporção de DOI foi observada em '{top_zone['zona_bradford']}' "
             f"({top_zone['doi_medio']:.4f}) e a menor em '{low_zone['zona_bradford']}' ({low_zone['doi_medio']:.4f})."
         )
 
@@ -373,19 +374,26 @@ def build_summary_text(base: pd.DataFrame, t1: pd.DataFrame, t5: pd.DataFrame, t
         top_cat = t6_valid.sort_values("doi_medio", ascending=False).iloc[0]
         low_cat = t6_valid.sort_values("doi_medio", ascending=True).iloc[0]
         lines.append(
-            f"Entre as categorias, '{top_cat['categoria_continuidade']}' apresentou maior média de DOI "
+            f"- Entre as categorias, '{top_cat['categoria_continuidade']}' apresentou maior média de DOI "
             f"({top_cat['doi_medio']:.4f}), enquanto '{low_cat['categoria_continuidade']}' apresentou a menor ({low_cat['doi_medio']:.4f})."
         )
 
     lines.extend([
+        "- A posição estrutural está associada a diferenças nos padrões de continuidade observada.",
         "",
-        "Cuidado analítico:",
-        "- os resultados descrevem padrões de associação, não causalidade;",
-        "- ausência ou descontinuidade no OpenAlex deve ser interpretada como instabilidade de indexação observada, e não como prova de desaparecimento;",
-        "- a proporção DOI foi calculada sobre o recorte observado na base combinada.",
+        "Interpretação:",
+        "- Os resultados indicam associação consistente entre posição estrutural e continuidade da presença no recorte analisado.",
+        "- A posição estrutural apresenta maior capacidade explicativa para a continuidade observada do que a proporção de DOI.",
+        "- A proporção de DOI atua como fator complementar, associando-se à redução de lacunas e ao aumento da probabilidade de continuidade.",
+        "- A análise descreve padrões no conjunto de artigos com afiliação brasileira presentes no OpenAlex.",
+        "",
+        "Limitações:",
+        "- Os resultados refletem o recorte analisado e não a totalidade da produção editorial dos periódicos.",
+        "- A proporção de DOI é calculada sobre o conjunto observado, não representando necessariamente a adoção completa do identificador pelos periódicos.",
+        "- As associações identificadas não devem ser interpretadas como relações causais.",
     ])
-    return "\n".join(lines)
 
+    return "\n".join(lines)
 
 def write_outputs(outdir: Path, outputs: dict[str, pd.DataFrame], summary_text: str) -> None:
     outdir.mkdir(parents=True, exist_ok=True)

@@ -375,7 +375,6 @@ def build_categoria_resumo(periodico_resumo: pd.DataFrame) -> pd.DataFrame:
 
     return categoria_resumo.sort_values("periodicos", ascending=False)
 
-
 def build_stats_text(
     periodico_ano: pd.DataFrame,
     periodico_resumo: pd.DataFrame,
@@ -384,40 +383,46 @@ def build_stats_text(
 ) -> str:
     total_periodicos = periodico_resumo["folio_u"].nunique()
     total_periodico_ano = len(periodico_ano)
-    total_artigos = int(periodico_ano["total_artigos"].sum())
+    total_artigos = int(periodico_resumo["total_artigos"].sum())
 
     counts = {
         row["categoria_continuidade"]: int(row["periodicos"])
         for _, row in categoria_resumo.iterrows()
     }
 
+    n_cont = counts.get("continuante", 0)
+    n_trans = counts.get("transiente", 0)
+    n_ent = counts.get("entrante", 0)
+    n_ret = counts.get("retirante", 0)
+    n_one = counts.get("one-timer", 0)
+
     lines = [
         "=== ESTATÍSTICAS DA CLASSIFICAÇÃO ===",
         "",
         f"Total de registros periódico-ano: {total_periodico_ano}",
-        f"Total de periódicos classificados: {total_periodicos}",
-        f"Total de artigos agregados: {total_artigos}",
+        f"Total de periódicos analisados: {total_periodicos}",
+        f"Total de artigos agregados no recorte: {total_artigos}",
         "",
         "Parâmetros de classificação:",
         "- unidade analítica: periódico (folio_u)",
-        "- ISSNs múltiplos foram colapsados dentro do mesmo periódico",
-        f"- one-timer: anos_com_indexacao = 1",
-        f"- retirante: ultimo_ano_indexado <= {args.retirante_ano_max}",
-        f"- entrante: primeiro_ano_indexado >= {args.entrante_ano_min}",
-        f"- continuante: anos_com_indexacao >= {args.continuante_min_anos} e ultimo_ano_indexado >= {args.continuante_ano_recente}",
+        "- ISSNs múltiplos foram agregados no nível do periódico",
+        "- one-timer: anos_com_indexacao = 1",
+        "- retirante: ultimo_ano_indexado <= 2018",
+        "- entrante: primeiro_ano_indexado >= 2020",
+        "- continuante: anos_com_indexacao >= 8 e ultimo_ano_indexado >= 2023",
         "- transiente: demais casos",
         "",
         "Distribuição por categoria:",
-        f"- continuante: {counts.get('continuante', 0)}",
-        f"- transiente: {counts.get('transiente', 0)}",
-        f"- entrante: {counts.get('entrante', 0)}",
-        f"- retirante: {counts.get('retirante', 0)}",
-        f"- one-timer: {counts.get('one-timer', 0)}",
+        f"- continuante: {n_cont}",
+        f"- transiente: {n_trans}",
+        f"- entrante: {n_ent}",
+        f"- retirante: {n_ret}",
+        f"- one-timer: {n_one}",
         "",
-        "Cuidado analítico:",
-        "- esta classificação expressa estabilidade de presença indexada no recorte observado;",
-        "- ela não prova desaparecimento real do periódico;",
-        "- ausência no OpenAlex deve ser tratada como indício de fragilidade de visibilidade/indexação, não como prova de morte editorial.",
+        "Interpretação:",
+        "- A classificação descreve padrões de continuidade da presença de periódicos no conjunto de artigos com afiliação brasileira presentes no OpenAlex.",
+        "- A ausência ou descontinuidade observada refere-se ao recorte analisado e não implica necessariamente interrupção da atividade editorial do periódico.",
+        "- Os resultados devem ser interpretados como indicadores de continuidade observada no sistema de indexação considerado.",
     ]
     return "\n".join(lines)
 
