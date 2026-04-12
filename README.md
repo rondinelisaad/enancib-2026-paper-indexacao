@@ -186,11 +186,12 @@ python3 scripts/06_analise_modelo_continuidade.py
 
 Os dados utilizados neste estudo não são versionados neste repositório.
 
+O diretório `data/` é utilizado apenas como ponto de entrada para execução do pipeline.
+
 Os dados completos e outputs analíticos estão disponíveis em:
 
 > **Zenodo:** https://doi.org/10.5281/zenodo.19355939
 
-O diretório `data/` é utilizado apenas como ponto de entrada para execução do pipeline.
 ---
 
 ## Reprodutibilidade
