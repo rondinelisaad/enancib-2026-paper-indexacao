@@ -50,7 +50,7 @@ enancib-2026-paper-indexacao/
 │   ├── 05_gerar_tabelas_resultados.py
 │   └── 06_analise_modelo_continuidade.py
 ├── docs/
-│   └── reproducibilidade.md
+│   └── reprodutibilidade.md
 └── data_sample/
 ```
 
@@ -196,7 +196,7 @@ O diretório `data/` é utilizado apenas como ponto de entrada para execução d
 ## Reprodutibilidade
 
 - Pipeline totalmente reproduzível via scripts sequenciais
-- Regras detalhadas em `docs/reproducibilidade.md`
+- Regras detalhadas em `docs/reprodutibilidade.md`
 - Dados versionados com DOI (Zenodo)
 - Código versionado (GitHub)
 
