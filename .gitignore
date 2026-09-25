@@ -28,6 +28,7 @@ data/*
 
 # EXCEÇÕES
 !data_sample/*.csv
+!analise_complementar_scielo/scielo_lista_oficial.csv
 
 # =========================
 # Python
